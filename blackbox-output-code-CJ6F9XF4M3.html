@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClassWiz Calculator</title>
+    <style>
+        /* CSS Section */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .calculator {
+            background: #0d1117;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            max-width: 400px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .display {
+            background: #161b22;
+            border-radius: 16px;
+            padding: 24px 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .display-input {
+            font-size: 2.2rem;
+            font-weight: 400;
+            color: #f0f6fc;
+            min-height: 48px;
+            word-break: break-all;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            line-height: 1.2;
+        }
+
+        .display-output {
+            font-size: 1.8rem;
+            font-weight: 300;
+            color: #8b949e;
+            min-height: 32px;
+            word-break: break-all;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .btn {
+            height: 64px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.4rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.95) translateY(2px);
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:active::before {
+            left: 100%;
+        }
+
+        .btn-number {
+            background: #21262d;
+            color: #f0f6fc;
+        }
+
+        .btn-number:hover {
+            background: #30363d;
+        }
+
+        .btn-operation {
+            background: #238636;
+            color: white;
+        }
+
+        .btn-operation:hover {
+            background: #2ea043;
+        }
+
+        .btn-function {
+            background: #da3633;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .btn-function:hover {
+            background: #f85149;
+        }
+
+        .btn-clear {
+            background: #f85149;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-clear:hover {
+            background: #da3633;
+        }
+
+        .btn-equals {
+            background: #1f6feb;
+            color: white;
+            grid-row: span 2;
+            height: 144px;
+        }
+
+        .btn-equals:hover {
+            background: #388bfd;
+        }
+
+        .btn-del {
+            background: #9e6b00;
+            color: white;
+        }
+
+        .btn-del:hover {
+            background: #d29916;
+        }
+
+        @media (max-width: 480px) {
+            .calculator {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .display-input {
+                font-size: 1.8rem;
+            }
+            
+            .display-output {
+                font-size: 1.4rem;
+            }
+            
+            .btn {
+                height: 56px;
+                font-size: 1.2rem;
+            }
+            
+            .btn-equals {
+                height: 128px;
+            }
+        }
+
+        /* Keyboard focus styles */
+        .btn:focus {
+            outline: 2px solid #58a6ff;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HTML Section -->
+    <div class="calculator" role="main" aria-label="Scientific Calculator">
+        <div class="display" role="display">
+            <div class="display-output" id="output" aria-live="polite">0</div>
+            <div class="display-input" id="input" aria-live="assertive">0</div>
+        </div>
+        
+        <div class="buttons">
+            <!-- Function row -->
+            <button class="btn btn-function" data-value="sin(" title="Sine">sin</button>
+            <button class="btn btn-function" data-value="cos(" title="Cosine">cos</button>
+            <button class="btn btn-function" data-value="tan(" title="Tangent">tan</button>
+            <button class="btn btn-function" data-value="√(" title="Square Root">√</button>
+            
+            <!-- Second function row -->
+            <button class="btn btn-function" data-value="log(" title="Logarithm">log</button>
+            <button class="btn btn-function" data-value="ln(" title="Natural Log">ln</button>
+            <button class="btn btn-function" data-value="^" title="Power">x<sup>y</sup></button>
+            <button class="btn btn-del" data-value="DEL" title="Delete">DEL</button>
+            
+            <!-- Clear and numbers -->
+            <button class="btn btn-clear" data-value="AC" title="All Clear">AC</button>
+            <button class="btn btn-number" data-value="(" title="Open Parenthesis">(</button>
+            <button class="btn btn-number" data-value=")" title="Close Parenthesis">)</button>
+            <button class="btn btn-number" data-value="÷" title="Divide">/</button>
+            
+            <button class="btn btn-number" data-value="7">7</button>
+            <button class="btn btn-number" data-value="8">8</button>
+            <button class="btn btn-number" data-value="9">9</button>
+            <button class="btn btn-operation" data-value="×" title="Multiply">×</button>
+            
+            <button class="btn btn-number" data-value="4">4</button>
+            <button class="btn btn-number" data-value="5">5</button>
+            <button class="btn btn-number" data-value="6">6</button>
+            <button class="btn btn-operation" data-value="-" title="Subtract">-</button>
+            
+            <button class="btn btn-number" data-value="1">1</button>
+            <button class="btn btn-number" data-value="2">2</button>
+            <button class="btn btn-number" data-value="3">3</button>
+            <button class="btn btn-operation" data-value="+" title="Add">+</button>
+            
+            <button class="btn btn-number" data-value="0" style="grid-column: span 2;">0</button>
+            <button class="btn btn-number" data-value="." title="Decimal">.</button>
+            <button class="btn btn-equals" data-value="=" title="Calculate">=</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Section -->
+    <script>
+        class SafeCalculator {
+            constructor() {
+                this.input = document.getElementById('input');
+                this.output = document.getElementById('output');
+                this.buttons = document.querySelectorAll('.btn');
+                this.currentInput = '0';
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.updateDisplay();
+                this.bindKeyboard();
+            }
+
+            bindEvents() {
+                this.buttons.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.handleInput(e.target.dataset.value);
+                    });
+                });
+            }
+
+            bindKeyboard() {
+                document.addEventListener('keydown', (e) => {
+                    const key = e.key;
+                    
+                    if (key >= '0' && key <= '9' || key === '.') {
+                        this.handleInput(key);
+                    } else if (['+', '-', '*', '/'].includes(key)) {
+                        this.handleInput(key === '*' ? '×' : key === '/' ? '÷' : key);
+                    } else if (key === 'Enter' || key === '=') {
+                        this.handleInput('=');
+                    } else if (key === 'Escape') {
+                        this.handleInput('AC');
+                    } else if (key === 'Backspace') {
+                        this.handleInput('DEL');
+                    } else if (['(', ')'].includes(key)) {
+                        this.handleInput(key);
+                    }
+                });
+            }
+
+            handleInput(value) {
+                switch (value) {
+                    case '=':
+                        this.calculate();
+                        break;
+                    case 'AC':
+                        this.clearAll();
+                        break;
+                    case 'DEL':
+                        this.deleteLast();
+                        break;
+                    case '÷':
+                        this.append('/');
+                        break;
+                    case '×':
+                        this.append('*');
+                        break;
+                    default:
+                        this.append(value);
+                }
+                this.updateDisplay();
+            }
+
+            append(value) {
+                if (this.currentInput === '0' && value !== '.') {
+                    this.currentInput = value;
+                } else {
+                    this.currentInput += value;
+                }
+            }
+
+            clearAll() {
+                this.currentInput = '0';
+            }
+
+            deleteLast() {
+                this.currentInput = this.currentInput.slice(0, -1) || '0';
+            }
+
+            calculate() {
+                try {
+                    const expression = this.parseExpression(this.currentInput);
+                    const result = this.safeEval(expression);
+                    
+                    if (!isNaN(result) && isFinite(result)) {
+                        this.currentInput = result.toString();
+                        
+                        // Format large numbers
+                        if (Math.abs(result) > 1e14) {
+                            this.currentInput = result.toExponential(8);
+                        } else {
+                            this.currentInput = parseFloat(result.toPrecision(12)).toString();
+                        }
+                    } else {
+                        this.currentInput = 'Error';
+                    }
+                } catch (error) {
+                    this.currentInput = 'Error';
+                }
+            }
+
+            parseExpression(expr) {
+                // Replace calculator symbols and handle functions
+                let parsed = expr
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/')
+                    .replace(/sin\$/g, 'Math.sin(Math.PI/180*')
+                    .replace(/cos\$/g, 'Math.cos(Math.PI/180*')
+                    .replace(/tan\$/g, 'Math.tan(Math.PI/180*')
+                    .replace(/√\$/g, 'Math.sqrt(')
+                    .replace(/log\$/g, 'Math.log10(')
+                    .replace(/ln\$/g, 'Math.log(');
+
+                // Handle power (x^y)
+                parsed = parsed.replace(/\^/g, '**');
+
+                return parsed;
+            }
+
+            safeEval(expression) {
+                // Create safe evaluation context
+                const context = {
+                    Math: Math,
+                    parseFloat: parseFloat,
+                    Number: Number,
+                    isNaN: isNaN,
+                    Infinity: Infinity
+                };
+
+                // Use Function constructor as safe alternative to eval
+                const fn = new Function(
+                    ...Object.keys(context),
+                    `return ${expression}`
+                );
+
+                return fn(...Object.values(context));
+            }
+
+            updateDisplay() {
+                this.input.textContent = this.currentInput || '0';
+                
+                // Show preview calculation
+                try {
+                    const preview = this.safeEval(this.parseExpression(this.currentInput));
+                    this.output.textContent = !isNaN(preview) && isFinite(preview) 
+                        ? preview.toLocaleString()
+                        : '';
+                } catch {
+                    this.output.textContent = '';
+                }
+            }
+        }
+
+        // Initialize calculator when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new SafeCalculator();
+        });
+    </script>
+</body>
+</html>
